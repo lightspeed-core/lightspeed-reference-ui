@@ -11,7 +11,7 @@ export type {
   StreamTokenData,
   StreamEndData,
   ToolExecutionCardsProps,
-  ChatbotState
+  ChatbotState,
 } from './types';
 
 // API service exports
@@ -35,5 +35,5 @@ export {
   INITIAL_WELCOME_PROMPTS,
   INITIAL_CONVERSATIONS,
   DEFAULT_SYSTEM_PROMPT,
-  FOOTNOTE_PROPS
-} from './constants'; 
+  FOOTNOTE_PROPS,
+} from './constants';

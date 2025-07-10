@@ -1,12 +1,12 @@
 import { API_BASE_URL } from '../constants';
-import { 
-  Model, 
-  QueryRequest, 
-  QueryResponse, 
-  StreamEvent, 
-  StreamStartData, 
-  StreamTokenData, 
-  StreamEndData 
+import {
+  Model,
+  QueryRequest,
+  QueryResponse,
+  StreamEvent,
+  StreamStartData,
+  StreamTokenData,
+  StreamEndData,
 } from '../types';
 
 /**
@@ -18,34 +18,34 @@ export const fetchModels = async (): Promise<Model[]> => {
     const response = await fetch(`${API_BASE_URL}/v1/models`, {
       method: 'GET',
     });
-    
+
     console.log('Models response status:', response.status);
-    
+
     if (!response.ok) {
       console.error('Models API error:', response.status, response.statusText);
       throw new Error(`Failed to fetch models: ${response.status}`);
     }
-    
+
     const data = await response.json();
     console.log('Models response data:', data);
-    
+
     const models = data.models || [];
     console.log('Extracted models:', models);
-    
+
     return models;
   } catch (error) {
     console.error('Error fetching models:', error);
     // Return fallback models for testing
     return [
       {
-        identifier: "test-model",
+        identifier: 'test-model',
         metadata: {},
-        api_model_type: "llm",
-        provider_id: "test",
-        provider_resource_id: "test-model",
-        type: "model",
-        model_type: "llm"
-      }
+        api_model_type: 'llm',
+        provider_id: 'test',
+        provider_resource_id: 'test-model',
+        type: 'model',
+        model_type: 'llm',
+      },
     ];
   }
 };
@@ -64,11 +64,11 @@ export const sendQuery = async (request: QueryRequest): Promise<QueryResponse> =
       },
       body: JSON.stringify(request),
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to send query');
     }
-    
+
     const data = await response.json();
     return data;
   } catch (error) {
@@ -88,7 +88,7 @@ export const sendStreamingQuery = async (
   request: QueryRequest,
   onToken: (token: string, tokenData?: StreamTokenData) => void,
   onStart: (conversationId: string) => void,
-  onEnd: (endData: StreamEndData) => void
+  onEnd: (endData: StreamEndData) => void,
 ): Promise<void> => {
   try {
     const response = await fetch(`${API_BASE_URL}/v1/streaming_query`, {
@@ -98,14 +98,14 @@ export const sendStreamingQuery = async (
       },
       body: JSON.stringify(request),
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to send streaming query');
     }
 
     const reader = response.body?.getReader();
     const decoder = new TextDecoder();
-    
+
     if (!reader) {
       throw new Error('No reader available');
     }
@@ -121,7 +121,7 @@ export const sendStreamingQuery = async (
         if (line.startsWith('data: ')) {
           try {
             const eventData: StreamEvent = JSON.parse(line.slice(6));
-            
+
             switch (eventData.event) {
               case 'start':
                 const startData = eventData.data as StreamStartData;
@@ -146,4 +146,4 @@ export const sendStreamingQuery = async (
     console.error('Error sending streaming query:', error);
     throw error;
   }
-}; 
+};

@@ -67,5 +67,5 @@ export interface ChatbotState {
   conversations: any;
   announcement?: string;
   currentConversationId: string;
-  toolExecutions: {[messageId: string]: string[]};
-} 
+  toolExecutions: { [messageId: string]: string[] };
+}

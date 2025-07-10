@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDocumentTitle } from '@app/utils/useDocumentTitle';
-import { Bullseye, DropdownList, DropdownItem, DropdownGroup, Title, TitleSizes, Flex } from '@patternfly/react-core';
+import { Bullseye, DropdownGroup, DropdownItem, DropdownList, Title, TitleSizes } from '@patternfly/react-core';
 
 // Chatbot components
 import ChatbotToggle from '@patternfly/chatbot/dist/dynamic/ChatbotToggle';
@@ -13,12 +13,12 @@ import MessageBox from '@patternfly/chatbot/dist/dynamic/MessageBox';
 import Message from '@patternfly/chatbot/dist/dynamic/Message';
 import ChatbotConversationHistoryNav from '@patternfly/chatbot/dist/dynamic/ChatbotConversationHistoryNav';
 import ChatbotHeader, {
-  ChatbotHeaderMenu,
-  ChatbotHeaderMain,
-  ChatbotHeaderTitle,
   ChatbotHeaderActions,
+  ChatbotHeaderMain,
+  ChatbotHeaderMenu,
+  ChatbotHeaderOptionsDropdown,
   ChatbotHeaderSelectorDropdown,
-  ChatbotHeaderOptionsDropdown
+  ChatbotHeaderTitle
 } from '@patternfly/chatbot/dist/dynamic/ChatbotHeader';
 
 // Icons
@@ -29,7 +29,7 @@ import OutlinedWindowRestoreIcon from '@patternfly/react-icons/dist/esm/icons/ou
 // Local imports
 import { useChatbot } from './hooks/useChatbot';
 import { ToolExecutionCards } from './components/ToolExecutionCards';
-import { FOOTNOTE_PROPS, INITIAL_WELCOME_PROMPTS, INITIAL_CONVERSATIONS } from './constants';
+import { FOOTNOTE_PROPS, INITIAL_CONVERSATIONS, INITIAL_WELCOME_PROMPTS } from './constants';
 import { findMatchingItems } from './utils/helpers';
 import { Conversation } from '@patternfly/chatbot/dist/dynamic/ChatbotConversationHistoryNav';
 
@@ -61,10 +61,6 @@ const LightspeedChatbot: React.FunctionComponent = () => {
     scrollToBottomRef,
     onSelectModel,
     onSelectDisplayMode,
-    onToggleChatbot,
-    onDrawerToggle,
-    onNewChat,
-    handleTextInputChange,
     handleSend,
     setChatbotVisible,
     setMessages,
