@@ -1,19 +1,30 @@
-# Patternfly Seed
+# Lightspeed Chatbot Reference UI
 
-Patternfly Seed is an open source build scaffolding utility for web apps. The primary purpose of this project is to give developers a jump start when creating new projects that will use patternfly. A secondary purpose of this project is to serve as a reference for how to configure various aspects of an application that uses patternfly, webpack, react, typescript, etc.
+A reference implementation of a chatbot interface built with React, TypeScript, and PatternFly. This project demonstrates how to integrate AI-powered conversational interfaces with modern web applications using the PatternFly design system.
 
-Out of the box you'll get an app layout with chrome (header/sidebar), routing, build pipeline, test suite, and some code quality tools. Basically, all the essentials.
+## ✨ Features
 
-<img width="1058" alt="Out of box dashboard view of patternfly seed" src="https://github.com/user-attachments/assets/0227b366-67f1-4df8-8d92-e8e95d6e08b3" />
+- **🤖 AI-Powered Chat**: Interactive chatbot with streaming responses
+- **🔧 Tool Execution**: Visual feedback for AI tool usage and execution
+- **📱 Multiple Display Modes**: Overlay, docked, and fullscreen modes
+- **🔄 Model Selection**: Choose from available AI models
+- **📚 Conversation History**: Persistent chat sessions with search
+- **♿ Accessibility**: Full screen reader support and keyboard navigation
+- **🎨 PatternFly Design**: Modern, consistent UI components
+- **📱 Responsive**: Works on desktop and mobile devices
 
-## Quick-start
+## 🚀 Quick Start
 
 ```bash
-git clone https://github.com/patternfly/patternfly-react-seed
-cd patternfly-react-seed
+git clone https://github.com/your-org/lightspeed-reference-ui
+cd lightspeed-reference-ui
 npm install && npm run start:dev
 ```
-## Development scripts
+
+The application will be available at `http://localhost:8080`
+
+## 📋 Development Scripts
+
 ```sh
 # Install development/build dependencies
 npm install
@@ -43,61 +54,197 @@ npm run bundle-profile:analyze
 npm run start
 ```
 
-## Configurations
-* [TypeScript Config](./tsconfig.json)
-* [Webpack Config](./webpack.common.js)
-* [Jest Config](./jest.config.js)
-* [Editor Config](./.editorconfig)
+## 🏗️ Project Structure
 
-## Raster image support
-
-To use an image asset that's shipped with PatternFly core, you'll prefix the paths with "@assets". `@assets` is an alias for the PatternFly assets directory in node_modules.
-
-For example:
-```js
-import imgSrc from '@assets/images/g_sizing.png';
-<img src={imgSrc} alt="Some image" />
+```
+src/
+├── app/
+│   ├── LightspeedChatbot/           # Main chatbot module
+│   │   ├── LightspeedChatbot.tsx    # Main chatbot component
+│   │   ├── components/              # Reusable components
+│   │   │   └── ToolExecutionCards.tsx
+│   │   ├── hooks/                   # Custom React hooks
+│   │   │   └── useChatbot.ts
+│   │   ├── services/                # API service layer
+│   │   │   └── api.ts
+│   │   ├── utils/                   # Helper functions
+│   │   │   └── helpers.ts
+│   │   ├── types.ts                 # TypeScript definitions
+│   │   └── constants.ts             # Configuration constants
+│   └── utils/                       # Shared utilities
+│       └── useDocumentTitle.ts
+├── index.html                       # HTML template
+└── index.tsx                        # Application entry point
 ```
 
-You can use a similar technique to import assets from your local app, just prefix the paths with "@app". `@app` is an alias for the main src/app directory.
+## 🔧 Configuration
 
-```js
-import loader from '@app/assets/images/loader.gif';
-<img src={loader} alt="Content loading" />
+### API Integration
+The chatbot connects to a backend API that should provide:
+- `GET /v1/models` - Available AI models
+- `POST /v1/query` - Send chat messages
+- `POST /v1/streaming_query` - Streaming chat responses
+
+### Customization
+Update `src/app/LightspeedChatbot/constants.ts` to configure:
+- `API_BASE_URL`: Backend API endpoint (default: `http://localhost:8080`)
+- `DEFAULT_SYSTEM_PROMPT`: AI behavior instructions
+- `USER_AVATAR`, `BOT_AVATAR`: Avatar URLs for chat participants
+- `FOOTNOTE_PROPS`: Footer disclaimer configuration
+
+## 🎯 Key Components
+
+### LightspeedChatbot
+The main chatbot interface that provides:
+- Chat message display with streaming
+- Model selection dropdown
+- Display mode switching (overlay/docked/fullscreen)
+- Conversation history with search
+- Tool execution visualization
+
+### ToolExecutionCards
+Displays active tool executions during AI processing:
+- Shows tool names and status
+- Provides visual feedback for long-running operations
+- Automatically updates as tools complete
+
+### useChatbot Hook
+Custom React hook that manages:
+- Chat state and message history
+- API communication and streaming
+- UI state (visibility, display modes)
+- Model selection and loading
+
+## 🔌 API Integration
+
+The chatbot expects a backend API with these endpoints:
+
+```typescript
+// Get available models
+GET /v1/models
+Response: {
+  models: Array<{
+    identifier: string;
+    metadata: Record<string, any>;
+    api_model_type: string;
+    provider_id: string;
+    provider_resource_id: string;
+    type: string;
+    model_type: string;
+  }>
+}
+
+// Send query (non-streaming)
+POST /v1/query
+Body: {
+  query: string;
+  conversation_id?: string;
+  provider?: string;
+  model?: string;
+  system_prompt?: string;
+  attachments?: Array<{
+    attachment_type: string;
+    content_type: string;
+    content: string;
+  }>;
+}
+
+// Send streaming query
+POST /v1/streaming_query
+Body: {
+  query: string;
+  conversation_id?: string;
+  provider?: string;
+  model?: string;
+  system_prompt?: string;
+  attachments?: Array<{
+    attachment_type: string;
+    content_type: string;
+    content: string;
+  }>;
+}
+Response: Server-Sent Events stream with events:
+- start: { conversation_id: string }
+- token: { id: number, role: string, token: string }
+- end: { referenced_documents: any[], truncated: any, input_tokens: number, output_tokens: number }
 ```
 
-## Vector image support
-Inlining SVG in the app's markup is also possible.
+## 📱 Usage Examples
 
-```js
-import logo from '@app/assets/images/logo.svg';
-<span dangerouslySetInnerHTML={{__html: logo}} />
-```
+### Basic Integration
+```typescript
+import { LightspeedChatbot } from './app/LightspeedChatbot';
 
-You can also use SVG when applying background images with CSS. To do this, your SVG's must live under a `bgimages` directory (this directory name is configurable in [webpack.common.js](./webpack.common.js#L5)). This is necessary because you may need to use SVG's in several other context (inline images, fonts, icons, etc.) and so we need to be able to differentiate between these usages so the appropriate loader is invoked.
-```css
-body {
-  background: url(./assets/bgimages/img_avatar.svg);
+function App() {
+  return (
+    <div className="app">
+      <main>
+        {/* Your app content */}
+      </main>
+      <LightspeedChatbot />
+    </div>
+  );
 }
 ```
 
-## Adding custom CSS
-When importing CSS from a third-party package for the first time, you may encounter the error `Module parse failed: Unexpected token... You may need an appropriate loader to handle this file typ...`. You need to register the path to the stylesheet directory in [stylePaths.js](./stylePaths.js). We specify these explicitly for performance reasons to avoid webpack needing to crawl through the entire node_modules directory when parsing CSS modules.
 
-## Code quality tools
-* For accessibility compliance, we use [react-axe](https://github.com/dequelabs/react-axe)
-* To keep our bundle size in check, we use [webpack-bundle-analyzer](https://github.com/webpack-contrib/webpack-bundle-analyzer)
-* To keep our code formatting in check, we use [prettier](https://github.com/prettier/prettier)
-* To keep our code logic and test coverage in check, we use [jest](https://github.com/facebook/jest)
-* To ensure code styles remain consistent, we use [eslint](https://eslint.org/)
+## 🧪 Testing
 
-## Multi environment configuration
-This project uses [dotenv-webpack](https://www.npmjs.com/package/dotenv-webpack) for exposing environment variables to your code. Either export them at the system level like `export MY_ENV_VAR=http://dev.myendpoint.com && npm run start:dev` or simply drop a `.env` file in the root that contains your key-value pairs like below:
+The project includes comprehensive tests:
 
-```sh
-ENV_1=http://1.myendpoint.com
-ENV_2=http://2.myendpoint.com
+```bash
+# Run all tests
+npm run test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests in watch mode
+npm run test:watch
 ```
 
+## 📦 Building
 
-With that in place, you can use the values in your code like `console.log(process.env.ENV_1);`
+```bash
+# Production build
+npm run build
+
+# Analyze bundle size
+npm run bundle-profile:analyze
+```
+
+## 🔧 Development Tools
+
+- **TypeScript**: Type safety and better development experience
+- **ESLint**: Code linting and style enforcement
+- **Prettier**: Code formatting
+- **Jest**: Unit testing framework
+- **React Testing Library**: Component testing utilities
+- **Webpack**: Module bundling and development server
+
+## 🌐 Browser Support
+
+This application supports modern browsers with ES6+ features:
+- Chrome 88+
+- Firefox 85+
+- Safari 14+
+- Edge 88+
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+If you encounter any issues or have questions:
+- Check the [Issues](https://github.com/your-org/lightspeed-reference-ui/issues) page
+- Review the component documentation in `src/app/LightspeedChatbot/README.md`
+- Refer to the [PatternFly documentation](https://www.patternfly.org/get-started/develop) for UI components
