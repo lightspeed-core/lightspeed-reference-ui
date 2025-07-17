@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardBody, CardTitle } from '@patternfly/react-core';
+import { Card, CardBody, CardTitle, Flex, FlexItem } from '@patternfly/react-core';
 import { ToolExecutionCardsProps } from '../types';
 
 /**
@@ -12,15 +12,22 @@ export const ToolExecutionCards: React.FC<ToolExecutionCardsProps> = ({ tools })
   }
   
   return (
-    <React.Fragment>
+    <Flex 
+      direction={{ default: 'row' }}
+      flexWrap={{ default: 'nowrap' }}
+      spaceItems={{ default: 'spaceItemsSm' }}
+      style={{ overflowX: 'auto', overflowY: 'hidden', paddingBottom: '8px' }}
+    >
       {tools.map((tool, index) => (
-        <Card key={index} isCompact>
-          <CardTitle>Tool Execution</CardTitle>
-          <CardBody>
-            Using tool: <strong>{tool}</strong>
-          </CardBody>
-        </Card>
+        <FlexItem key={index} flex={{ default: 'flexNone' }}>
+          <Card isCompact >
+            <CardTitle>Tool Execution</CardTitle>
+            <CardBody>
+              Using tool: <strong>{tool}</strong>
+            </CardBody>
+          </Card>
+        </FlexItem>
       ))}
-    </React.Fragment>
+    </Flex>
   );
 }; 

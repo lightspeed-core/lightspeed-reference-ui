@@ -7,6 +7,7 @@ import {
   StreamStartData,
   StreamTokenData,
   StreamEndData,
+  ConversationResponse,
 } from '../types';
 
 /**
@@ -35,18 +36,7 @@ export const fetchModels = async (): Promise<Model[]> => {
     return models;
   } catch (error) {
     console.error('Error fetching models:', error);
-    // Return fallback models for testing
-    return [
-      {
-        identifier: 'test-model',
-        metadata: {},
-        api_model_type: 'llm',
-        provider_id: 'test',
-        provider_resource_id: 'test-model',
-        type: 'model',
-        model_type: 'llm',
-      },
-    ];
+    return [];
   }
 };
 
@@ -144,6 +134,59 @@ export const sendStreamingQuery = async (
     }
   } catch (error) {
     console.error('Error sending streaming query:', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches a conversation by ID from the API
+ * @param conversationId The ID of the conversation to fetch
+ * @returns Promise<ConversationResponse> The conversation data
+ */
+export const fetchConversation = async (conversationId: string): Promise<ConversationResponse> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/v1/conversations/${conversationId}`, {
+      method: 'GET',
+    });
+
+    console.log('Conversation response status:', response.status);
+
+    if (!response.ok) {
+      console.error('Conversation API error:', response.status, response.statusText);
+      throw new Error(`Failed to fetch conversation: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Conversation response data:', data);
+
+    return data;
+  } catch (error) {
+    console.error('Error fetching conversation:', error);
+    throw error;
+  }
+};
+
+/**
+ * Deletes a conversation by ID from the API
+ * @param conversationId The ID of the conversation to delete
+ * @returns Promise<void>
+ */
+export const deleteConversation = async (conversationId: string): Promise<void> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/v1/conversations/${conversationId}`, {
+      method: 'DELETE',
+    });
+
+    console.log('Delete conversation response status:', response.status);
+
+    if (!response.ok) {
+      console.error('Delete conversation API error:', response.status, response.statusText);
+      throw new Error(`Failed to delete conversation: ${response.status}`);
+    }
+
+    console.log('Conversation deleted successfully:', conversationId);
+  } catch (error) {
+    console.error('Error deleting conversation:', error);
     throw error;
   }
 };
