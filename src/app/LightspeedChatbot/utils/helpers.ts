@@ -13,12 +13,19 @@ export const generateId = (): string => {
 /**
  * Finds matching conversation items based on search value
  * @param targetValue The search string
- * @returns Matching conversations object
+ * @param conversations The conversations to search through
+ * @returns Matching conversations array
  */
-export const findMatchingItems = (targetValue: string): { [key: string]: Conversation[] } => {
-  // Since we start with empty conversations, return empty object
-  // In a real implementation, you would filter conversations based on targetValue
-  return {};
+export const findMatchingItems = (targetValue: string, conversations: Conversation[]): Conversation[] => {
+  if (!targetValue.trim()) {
+    return conversations;
+  }
+
+  return conversations.filter(
+    (conversation) =>
+      conversation.text?.toLowerCase().includes(targetValue.toLowerCase()) ||
+      conversation.id?.toLowerCase().includes(targetValue.toLowerCase()),
+  );
 };
 
 /**

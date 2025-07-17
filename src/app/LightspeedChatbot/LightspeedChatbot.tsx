@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDocumentTitle } from '@app/utils/useDocumentTitle';
-import { Bullseye, DropdownGroup, DropdownItem, DropdownList, Title, TitleSizes } from '@patternfly/react-core';
+import { Bullseye, DropdownGroup, DropdownItem, DropdownList, Flex, FlexItem, Title, TitleSizes } from '@patternfly/react-core';
 
 // Chatbot components
 import ChatbotToggle from '@patternfly/chatbot/dist/dynamic/ChatbotToggle';
@@ -20,6 +20,9 @@ import ChatbotHeader, {
   ChatbotHeaderSelectorDropdown,
   ChatbotHeaderTitle
 } from '@patternfly/chatbot/dist/dynamic/ChatbotHeader';
+import FileDropZone from '@patternfly/chatbot/dist/dynamic/FileDropZone';
+import FileDetailsLabel from '@patternfly/chatbot/dist/dynamic/FileDetailsLabel';
+import ChatbotAlert from '@patternfly/chatbot/dist/dynamic/ChatbotAlert';
 
 // Icons
 import ExpandIcon from '@patternfly/react-icons/dist/esm/icons/expand-icon';
@@ -29,9 +32,7 @@ import OutlinedWindowRestoreIcon from '@patternfly/react-icons/dist/esm/icons/ou
 // Local imports
 import { useChatbot } from './hooks/useChatbot';
 import { ToolExecutionCards } from './components/ToolExecutionCards';
-import { FOOTNOTE_PROPS, INITIAL_CONVERSATIONS, INITIAL_WELCOME_PROMPTS } from './constants';
-import { findMatchingItems } from './utils/helpers';
-import { Conversation } from '@patternfly/chatbot/dist/dynamic/ChatbotConversationHistoryNav';
+import { FOOTNOTE_PROPS, INITIAL_WELCOME_PROMPTS } from './constants';
 
 /**
  * Main Lightspeed Chatbot Component
@@ -40,13 +41,13 @@ import { Conversation } from '@patternfly/chatbot/dist/dynamic/ChatbotConversati
  * - Model selection
  * - Streaming responses
  * - Tool execution tracking
+ * - File attachments
  * - Conversation history
  * - Multiple display modes (overlay, docked, fullscreen)
  */
 const LightspeedChatbot: React.FunctionComponent = () => {
   useDocumentTitle('Lightspeed Chatbot');
   
-  // Use the custom hook for all chatbot logic
   const {
     chatbotVisible,
     displayMode,
@@ -56,18 +57,30 @@ const LightspeedChatbot: React.FunctionComponent = () => {
     isSendButtonDisabled,
     isDrawerOpen,
     conversations,
+    currentConversationId,
     announcement,
     toolExecutions,
     scrollToBottomRef,
+    attachedFiles,
+    isLoadingFile,
+    fileError,
+    showFileAlert,
     onSelectModel,
     onSelectDisplayMode,
     handleSend,
+    handleAttach,
+    handleFileDrop,
+    onAttachmentClose,
+    onCloseFileAlert,
+    handleTextInputChange,
+    handleConversationSelect,
     setChatbotVisible,
     setMessages,
-    setConversations,
     setCurrentConversationId,
     setIsDrawerOpen
-  } = useChatbot();
+    } = useChatbot();
+
+
 
   // Enhanced message rendering with tool execution support
   const renderMessages = () => {
@@ -113,29 +126,23 @@ const LightspeedChatbot: React.FunctionComponent = () => {
           displayMode={displayMode}
           onDrawerToggle={() => {
             setIsDrawerOpen(!isDrawerOpen);
-            setConversations(INITIAL_CONVERSATIONS);
           }}
           isDrawerOpen={isDrawerOpen}
           setIsDrawerOpen={setIsDrawerOpen}
-          activeItemId="1"
-          // eslint-disable-next-line no-console
-          onSelectActiveItem={(e, selectedItem) => console.log(`Selected history item with id ${selectedItem}`)}
+          activeItemId={currentConversationId}
+          onSelectActiveItem={(e, selectedItem) => {
+            console.log(`Selected history item with id ${selectedItem}`);
+            if (typeof selectedItem === 'string') {
+              handleConversationSelect(selectedItem);
+            }
+          }}
           conversations={conversations}
           onNewChat={() => {
             setIsDrawerOpen(!isDrawerOpen);
             setMessages([]);
-            setConversations(INITIAL_CONVERSATIONS);
             setCurrentConversationId('');
           }}
-          handleTextInputChange={(value: string) => {
-            if (value === '') {
-              setConversations(INITIAL_CONVERSATIONS);
-            }
-            // this is where you would perform search on the items in the drawer
-            // and update the state
-            const newConversations: { [key: string]: Conversation[] } = findMatchingItems(value);
-            setConversations(newConversations);
-          }}
+          handleTextInputChange={handleTextInputChange}
           drawerContent={
             <>
               <ChatbotHeader>
@@ -145,7 +152,7 @@ const LightspeedChatbot: React.FunctionComponent = () => {
                     displayMode={displayMode}
                     showOnFullScreen={horizontalLogo}
                     showOnDefault={iconLogo}
-                  ></ChatbotHeaderTitle>
+                  />
                 </ChatbotHeaderMain>
                 <ChatbotHeaderActions>
                   <ChatbotHeaderSelectorDropdown value={selectedModel} onSelect={onSelectModel}>
@@ -196,24 +203,50 @@ const LightspeedChatbot: React.FunctionComponent = () => {
                   </ChatbotHeaderOptionsDropdown>
                 </ChatbotHeaderActions>
               </ChatbotHeader>
-              <ChatbotContent>
-                {/* Update the announcement prop on MessageBox whenever a new message is sent
-                 so that users of assistive devices receive sufficient context  */}
-                <MessageBox announcement={announcement}>
-                  <ChatbotWelcomePrompt
-                    title="Hello, Lightspeed User"
-                    description="How may I help you today?"
-                    prompts={INITIAL_WELCOME_PROMPTS}
-                  />
-                  {/* Display all messages */}
-                  {renderMessages()}
-                  {/* Scroll reference at the bottom of all messages for proper streaming behavior */}
-                  <div ref={scrollToBottomRef}/>
-                </MessageBox>
-              </ChatbotContent>
+              <FileDropZone onFileDrop={handleFileDrop} displayMode={displayMode}>
+                <ChatbotContent>
+                  <MessageBox announcement={announcement}>
+                    {showFileAlert && (
+                      <ChatbotAlert
+                        variant="danger"
+                        onClose={onCloseFileAlert}
+                        title="File upload failed"
+                      >
+                        {fileError}
+                      </ChatbotAlert>
+                    )}
+                    <ChatbotWelcomePrompt
+                      title="Hello, Lightspeed User"
+                      description="How may I help you today?"
+                      prompts={INITIAL_WELCOME_PROMPTS}
+                    />
+                    {renderMessages()}
+                    <div ref={scrollToBottomRef}/>
+                  </MessageBox>
+                </ChatbotContent>
+              </FileDropZone>
               <ChatbotFooter>
+                <Flex 
+                  direction={{ default: 'row' }}
+                  flexWrap={{ default: 'nowrap' }} 
+                  spaceItems={{ default: 'spaceItemsSm' }} 
+                  style={{ overflowX: 'auto', overflowY: 'hidden', paddingBottom: '8px' }}
+                >
+                  {attachedFiles.map((file, index) => (
+                    <FlexItem key={index} flex={{ default: 'flexNone' }}>
+                      <FileDetailsLabel 
+                        key={index} 
+                        fileName={file.name} 
+                        isLoading={isLoadingFile && index === attachedFiles.length - 1} 
+                        onClose={() => onAttachmentClose(index)} 
+                      />
+                    </FlexItem>
+                  ))}
+                </Flex>
                 <MessageBar
                   onSendMessage={handleSend}
+                  handleAttach={handleAttach}
+                  hasAttachButton
                   hasMicrophoneButton
                   isSendButtonDisabled={isSendButtonDisabled}
                 />
@@ -221,7 +254,7 @@ const LightspeedChatbot: React.FunctionComponent = () => {
               </ChatbotFooter>
             </>
           }
-        ></ChatbotConversationHistoryNav>
+        />
       </Chatbot>
     </>
   );

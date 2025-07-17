@@ -27,6 +27,19 @@ export interface QueryResponse {
   response: string;
 }
 
+// Conversation history types
+export interface ConversationResponse {
+  conversation_id: string;
+  chat_history: Array<{
+    messages: Array<{
+      content: string;
+      type: 'user' | 'assistant';
+    }>;
+    started_at: string;
+    completed_at?: string;
+  }>;
+}
+
 // Streaming types
 export interface StreamEvent {
   event: 'start' | 'token' | 'end';

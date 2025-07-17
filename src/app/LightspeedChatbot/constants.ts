@@ -1,5 +1,6 @@
 import { MessageProps } from '@patternfly/chatbot/dist/dynamic/Message';
 import { WelcomePrompt } from '@patternfly/chatbot/dist/dynamic/ChatbotWelcomePrompt';
+import { Conversation } from '@patternfly/chatbot/dist/dynamic/ChatbotConversationHistoryNav';
 
 // API Configuration
 export const API_BASE_URL = 'http://localhost:8080';
@@ -13,7 +14,7 @@ export const BOT_AVATAR =
 // Initial states
 export const INITIAL_MESSAGES: MessageProps[] = [];
 export const INITIAL_WELCOME_PROMPTS: WelcomePrompt[] = [];
-export const INITIAL_CONVERSATIONS = {};
+export const INITIAL_CONVERSATIONS: Conversation[] = [];
 
 // Default system prompt
 export const DEFAULT_SYSTEM_PROMPT = 'You are a helpful assistant.';
