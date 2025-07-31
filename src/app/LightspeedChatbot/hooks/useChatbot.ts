@@ -257,6 +257,8 @@ export const useChatbot = () => {
     setFileError(undefined);
   };
 
+
+
   const handleSend = async (message: string | number) => {
     setIsSendButtonDisabled(true);
     const messageContent = String(message);
@@ -393,6 +395,12 @@ export const useChatbot = () => {
                   share: { onClick: () => {} },
                   listen: { onClick: () => {} },
                 },
+                sources: endData.referenced_documents && endData.referenced_documents.length > 0 ? {
+                  sources: endData.referenced_documents.map(doc => ({
+                    title: doc.doc_title,
+                    link: doc.doc_url,
+                  })),
+                } : undefined,
               };
             }
             return updatedMessages;
