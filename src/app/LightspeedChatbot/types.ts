@@ -57,7 +57,10 @@ export interface StreamTokenData {
 }
 
 export interface StreamEndData {
-  referenced_documents: any[];
+  referenced_documents: Array<{
+    doc_url: string;
+    doc_title: string;
+  }>;
   truncated: any;
   input_tokens: number;
   output_tokens: number;
