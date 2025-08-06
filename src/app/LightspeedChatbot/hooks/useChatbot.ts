@@ -4,7 +4,7 @@ import { MessageProps } from '@patternfly/chatbot/dist/dynamic/Message';
 import { Conversation } from '@patternfly/chatbot/dist/dynamic/ChatbotConversationHistoryNav';
 import { DropEvent, DropdownItem, DropdownList } from '@patternfly/react-core';
 
-import { Model, QueryRequest, StreamTokenData, StreamEndData, ConversationResponse } from '../types';
+import { Model, QueryRequest, StreamTokenData, StreamEndData, ConversationResponse, StreamToolCallData } from '../types';
 import { INITIAL_MESSAGES, INITIAL_CONVERSATIONS, USER_AVATAR, BOT_AVATAR, DEFAULT_SYSTEM_PROMPT } from '../constants';
 import { fetchModels, sendStreamingQuery, fetchConversation, deleteConversation } from '../services/api';
 import { generateId, findMatchingItems, copyToClipboard } from '../utils/helpers';
@@ -41,7 +41,7 @@ export const useChatbot = () => {
       // Set first LLM model as default
       const defaultModel = models.find((model) => model.api_model_type === 'llm');
       if (defaultModel) {
-        setSelectedModel(defaultModel.identifier);
+        setSelectedModel(defaultModel.provider_resource_id);
         setSelectedProvider(defaultModel.provider_id);
       }
     };
@@ -148,7 +148,12 @@ export const useChatbot = () => {
 
   // Selection handlers
   const onSelectModel = (_event?: React.MouseEvent, value?: string | number) => {
-    setSelectedModel(value as string);
+    const selectedIdentifier = value as string;
+    const selectedModelData = availableModels.find(model => model.identifier === selectedIdentifier);
+    if (selectedModelData) {
+      setSelectedModel(selectedModelData.provider_resource_id);
+      setSelectedProvider(selectedModelData.provider_id);
+    }
   };
 
   const onSelectDisplayMode = (_event?: React.MouseEvent, value?: string | number) => {
@@ -328,6 +333,7 @@ export const useChatbot = () => {
         conversation_id: currentConversationId || undefined,
         model: selectedModel || undefined,
         provider: selectedProvider || undefined,
+        no_tools: false,
         system_prompt: DEFAULT_SYSTEM_PROMPT,
         attachments:
           attachedFiles.length > 0 && fileContents.length > 0
@@ -347,15 +353,7 @@ export const useChatbot = () => {
         queryRequest,
         // onToken callback
         (token: string, tokenData?: StreamTokenData) => {
-          if (tokenData && tokenData.role === 'tool_execution') {
-            currentToolExecutions.push(token);
-            setToolExecutions((prev) => ({
-              ...prev,
-              [botMessageId]: [...currentToolExecutions],
-            }));
-          } else {
-            streamingContent += token;
-          }
+          streamingContent += token;
 
           setMessages((prevMessages) => {
             const updatedMessages = [...prevMessages];
@@ -407,6 +405,23 @@ export const useChatbot = () => {
           });
           setAnnouncement(`Message from Lightspeed AI: ${streamingContent}`);
         },
+        // onToolCall callback
+        (toolCallData: StreamToolCallData) => {
+          console.log('toolCallData', toolCallData);
+          if (
+            typeof toolCallData.token === 'object' &&
+            toolCallData.token !== null &&
+            typeof toolCallData.token.tool_name === 'string' &&
+            typeof toolCallData.token.arguments === 'object'
+          ) {
+            const { tool_name, arguments: toolArgs } = toolCallData.token;
+            currentToolExecutions.push(`${tool_name}(${JSON.stringify(toolArgs)})`);
+          }
+          setToolExecutions((prev) => ({
+            ...prev,
+            [botMessageId]: [...currentToolExecutions],
+          }));
+        },        
       );
     } catch (error) {
       console.error('Error sending streaming query:', error);

@@ -6,6 +6,7 @@ import {
   StreamEvent,
   StreamStartData,
   StreamTokenData,
+  StreamToolCallData,
   StreamEndData,
   ConversationResponse,
 } from '../types';
@@ -79,6 +80,7 @@ export const sendStreamingQuery = async (
   onToken: (token: string, tokenData?: StreamTokenData) => void,
   onStart: (conversationId: string) => void,
   onEnd: (endData: StreamEndData) => void,
+  onToolCall: (toolCallData: StreamToolCallData) => void,
 ): Promise<void> => {
   try {
     const response = await fetch(`${API_BASE_URL}/v1/streaming_query`, {
@@ -116,6 +118,10 @@ export const sendStreamingQuery = async (
               case 'start':
                 const startData = eventData.data as StreamStartData;
                 onStart(startData.conversation_id);
+                break;
+              case 'tool_call':
+                const toolCallData = eventData.data as StreamToolCallData;
+                onToolCall(toolCallData);
                 break;
               case 'token':
                 const tokenData = eventData.data as StreamTokenData;
