@@ -14,6 +14,7 @@ export interface QueryRequest {
   conversation_id?: string;
   provider?: string;
   model?: string;
+  no_tools?: boolean;
   system_prompt?: string;
   attachments?: Array<{
     attachment_type: string;
@@ -42,7 +43,7 @@ export interface ConversationResponse {
 
 // Streaming types
 export interface StreamEvent {
-  event: 'start' | 'token' | 'end';
+  event: 'start' | 'token' | 'tool_call' | 'end';
   data: any;
 }
 
@@ -54,6 +55,12 @@ export interface StreamTokenData {
   id: number;
   role: string;
   token: string;
+}
+
+export interface StreamToolCallData {
+  id: number;
+  role: string;
+  token: string | Record<string, any>;
 }
 
 export interface StreamEndData {

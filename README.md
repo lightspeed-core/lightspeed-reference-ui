@@ -15,6 +15,10 @@ A reference implementation of a chatbot interface built with React, TypeScript, 
 
 ## 🚀 Quick Start
 
+**Prerequisites**: Ensure the [lightspeed-stack](https://github.com/lightspeed-core/lightspeed-stack) is running to provide the backend API services.
+
+If you need help getting `lightspeed-stack` running follow this [guide](https://github.com/lightspeed-core/lightspeed-stack/blob/main/docs/getting_started.md).
+
 ```bash
 git clone https://github.com/your-org/lightspeed-reference-ui
 cd lightspeed-reference-ui
@@ -166,6 +170,7 @@ Body: {
 Response: Server-Sent Events stream with events:
 - start: { conversation_id: string }
 - token: { id: number, role: string, token: string }
+- tool_call: { id: number, role: string, token: string | Record<string, any> }
 - end: { referenced_documents: any[], truncated: any, input_tokens: number, output_tokens: number }
 ```
 
@@ -245,6 +250,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🆘 Support
 
 If you encounter any issues or have questions:
-- Check the [Issues](https://github.com/your-org/lightspeed-reference-ui/issues) page
+- Check the [Issues](https://github.com/lightspeed-core/lightspeed-reference-ui/issues) page
 - Review the component documentation in `src/app/LightspeedChatbot/README.md`
 - Refer to the [PatternFly documentation](https://www.patternfly.org/get-started/develop) for UI components
