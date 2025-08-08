@@ -25,7 +25,7 @@ cd lightspeed-reference-ui
 npm install && npm run start:dev
 ```
 
-The application will be available at `http://localhost:8080`
+The application will be available at `http://localhost:9000`
 
 ## 📋 Development Scripts
 
