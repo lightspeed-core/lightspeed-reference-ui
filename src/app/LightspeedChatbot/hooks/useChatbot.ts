@@ -41,7 +41,7 @@ export const useChatbot = () => {
       // Set first LLM model as default
       const defaultModel = models.find((model) => model.api_model_type === 'llm');
       if (defaultModel) {
-        setSelectedModel(defaultModel.provider_resource_id);
+        setSelectedModel(defaultModel.identifier);
         setSelectedProvider(defaultModel.provider_id);
       }
     };
@@ -151,7 +151,7 @@ export const useChatbot = () => {
     const selectedIdentifier = value as string;
     const selectedModelData = availableModels.find(model => model.identifier === selectedIdentifier);
     if (selectedModelData) {
-      setSelectedModel(selectedModelData.provider_resource_id);
+      setSelectedModel(selectedModelData.identifier);
       setSelectedProvider(selectedModelData.provider_id);
     }
   };
